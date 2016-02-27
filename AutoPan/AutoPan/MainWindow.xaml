@@ -7,8 +7,13 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="23" Margin="10,10,0,0" TextWrapping="Wrap" Text="Username" VerticalAlignment="Top" Width="417"/>
-        <Button x:Name="button" Content="Connect" HorizontalAlignment="Left" Margin="432,10,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.693,0.6" Click="Connect"/>
+        <TextBox x:Name="EmailTextBox" Height="21" Margin="320,10,10,0" VerticalAlignment="Top" MaxLines="1"/>
+        <TextBox x:Name="PasswordTextBox" Height="23" Margin="320,36,10,0" VerticalAlignment="Top" MaxLines="1"/>
+        <Button x:Name="LoginButton" Content="Login" Margin="0,64,10,0" VerticalAlignment="Top" Click="OnLogin" HorizontalAlignment="Right" Width="75"/>
+        <Button x:Name="ConnectButton" Content="Connect" HorizontalAlignment="Left" Margin="10,156,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.514,0.467" Click="OnConnect"/>
+        <Image x:Name="image" Source="Graphics/auto-pan-logo.png" Width="250" Height="105" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Label x:Name="label" Content="Email:" HorizontalAlignment="Left" Margin="272,10,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="label1" Content="Password:" HorizontalAlignment="Left" Margin="250,34,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>

@@ -23,25 +23,27 @@ namespace AutoPan
     /// </summary>
     public partial class MainWindow : Window
     {
+        DiscordClient client = null;
+
         public MainWindow()
         {
             InitializeComponent();
         }
 
-        private async void Connect(object sender, RoutedEventArgs e)
+        private async void OnLogin(object sender, RoutedEventArgs e)
         {
             while (true)
             {
-                DiscordClient _client = new DiscordClient(x =>
-            {
-                x.AppName = "Auto Pan";
-                x.AppUrl = "http://allenwp.github.io/autopan";
-                x.MessageCacheSize = 0;
-                x.UsePermissionsCache = false;
-                x.EnablePreUpdateEvents = true;
-                x.LogLevel = LogSeverity.Info;
-                //x.LogHandler = OnLogMessage;
-            })
+                client = new DiscordClient(x =>
+                {
+                    x.AppName = "Auto Pan";
+                    x.AppUrl = "http://allenwp.github.io/autopan";
+                    x.MessageCacheSize = 0;
+                    x.UsePermissionsCache = false;
+                    x.EnablePreUpdateEvents = true;
+                    x.LogLevel = LogSeverity.Info;
+                    //x.LogHandler = OnLogMessage;
+                })
             .UsingAudio(x =>
             {
                 x.Mode = AudioMode.Incoming;
@@ -49,38 +51,47 @@ namespace AutoPan
                 x.EnableEncryption = true;
             })
             .AddService<HttpService>();
-                
+
                 try
                 {
-                    await _client.Connect("email", "password");
-                    _client.SetGame("Discord.Net");
-
-                    bool hasConnected = false;
-
-                    foreach (Server server in _client.Servers)
-                    {
-                        foreach (Channel channel in server.AllChannels)
-                        {
-                            await channel.SendMessage("'sup?");
-                        }
-
-                        if (!hasConnected)
-                        {
-                            foreach (Channel channel in server.VoiceChannels)
-                            {
-                                IAudioClient audioClient = await channel.JoinAudio();
-                                hasConnected = true;
-                            }
-                        }
-                    }
-
+                    await client.Connect(EmailTextBox.Text, PasswordTextBox.Text);
+                    client.SetGame("Auto Pan");
                     break;
                 }
                 catch (Exception ex)
                 {
-                    _client.Log.Error($"Login Failed", ex);
-                    await Task.Delay(_client.Config.FailedReconnectDelay);
+                    client.Log.Error($"Login Failed", ex);
+                    await Task.Delay(client.Config.FailedReconnectDelay);
                 }
+            }
+        }
+
+        private async void OnConnect(object sender, RoutedEventArgs e)
+        {
+            bool hasConnected = false;
+
+            try
+            {
+                foreach (Server server in client.Servers)
+                {
+                    foreach (Channel channel in server.AllChannels)
+                    {
+                        await channel.SendMessage("'sup?");
+                    }
+
+                    if (!hasConnected)
+                    {
+                        foreach (Channel channel in server.VoiceChannels)
+                        {
+                            IAudioClient audioClient = await channel.JoinAudio();
+                            hasConnected = true;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //ruh roh.
             }
         }
     }
