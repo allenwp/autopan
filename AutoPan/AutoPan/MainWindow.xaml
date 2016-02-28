@@ -5,15 +5,21 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AutoPan"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="Auto Pan for Discord" Height="420.605" Width="677.305">
     <Grid>
-        <TextBox x:Name="EmailTextBox" Height="21" Margin="320,10,10,0" VerticalAlignment="Top" MaxLines="1"/>
-        <TextBox x:Name="PasswordTextBox" Height="23" Margin="320,36,10,0" VerticalAlignment="Top" MaxLines="1"/>
-        <Button x:Name="LoginButton" Content="Login" Margin="0,64,10,0" VerticalAlignment="Top" Click="OnLogin" HorizontalAlignment="Right" Width="75"/>
-        <Button x:Name="ConnectButton" Content="Connect" HorizontalAlignment="Left" Margin="10,156,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.514,0.467" Click="OnConnect"/>
+        <TextBox x:Name="emailTextBox" Height="21" Margin="320,21,10,0" VerticalAlignment="Top" MaxLines="1"/>
+        <PasswordBox x:Name="passwordBox" Margin="320,47,10,0" VerticalAlignment="Top" Height="21"/>
+        <CheckBox x:Name="savePasswordCheckBox" Content="Save Password" HorizontalAlignment="Left" Margin="320,75,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="loginButton" Content="Log in to Discord" Margin="0,73,10,0" VerticalAlignment="Top" Click="OnLogin" HorizontalAlignment="Right" Width="132" IsDefault="True"/>
+        <Button x:Name="connectButton" Content="Connect" HorizontalAlignment="Left" Margin="10,165,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.514,0.467" Click="OnConnect" IsEnabled="False"/>
         <Image x:Name="image" Source="Graphics/auto-pan-logo.png" Width="250" Height="105" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-        <Label x:Name="label" Content="Email:" HorizontalAlignment="Left" Margin="272,10,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="label1" Content="Password:" HorizontalAlignment="Left" Margin="250,34,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="label" Content="Email:" HorizontalAlignment="Left" Margin="276,23,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="label1" Content="Password:" HorizontalAlignment="Left" Margin="254,47,0,0" VerticalAlignment="Top"/>
+        <ComboBox x:Name="channelComboBox" HorizontalAlignment="Left" Margin="10,138,0,0" VerticalAlignment="Top" Width="240" IsEnabled="False"/>
+        <Label x:Name="label2" Content="Connect to Voice Channel:" HorizontalAlignment="Left" Margin="10,111,0,0" VerticalAlignment="Top"/>
+        <ScrollViewer x:Name="logScrollViewer" Margin="10,190,0,10" HorizontalAlignment="Left" Width="250">
+            <TextBlock x:Name="logTextBlock" TextWrapping="Wrap" Background="#FFF7F7F7" Padding="3,3,3,3" />
+        </ScrollViewer>
 
     </Grid>
 </Window>

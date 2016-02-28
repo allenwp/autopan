@@ -42,19 +42,19 @@ namespace AutoPan
                     x.UsePermissionsCache = false;
                     x.EnablePreUpdateEvents = true;
                     x.LogLevel = LogSeverity.Info;
-                    //x.LogHandler = OnLogMessage;
+                    x.LogHandler = OnLogMessage;
                 })
-            .UsingAudio(x =>
-            {
-                x.Mode = AudioMode.Incoming;
-                x.EnableMultiserver = false;
-                x.EnableEncryption = true;
-            })
-            .AddService<HttpService>();
+                .UsingAudio(x =>
+                {
+                    x.Mode = AudioMode.Incoming;
+                    x.EnableMultiserver = false;
+                    x.EnableEncryption = true;
+                })
+                .AddService<HttpService>();
 
                 try
                 {
-                    await client.Connect(EmailTextBox.Text, PasswordTextBox.Text);
+                    await client.Connect(emailTextBox.Text, passwordBox.Password);
                     client.SetGame("Auto Pan");
                     break;
                 }
@@ -93,6 +93,83 @@ namespace AutoPan
             {
                 //ruh roh.
             }
+        }
+
+        private void OnLogMessage(object sender, LogMessageEventArgs e)
+        {
+            Dispatcher.Invoke((Action)(() =>
+            {
+                string oldText = logTextBlock.Text;
+
+                //Color
+                ConsoleColor color;
+                switch (e.Severity)
+                {
+                    case LogSeverity.Error: color = ConsoleColor.Red; break;
+                    case LogSeverity.Warning: color = ConsoleColor.Yellow; break;
+                    case LogSeverity.Info: color = ConsoleColor.White; break;
+                    case LogSeverity.Verbose: color = ConsoleColor.Gray; break;
+                    case LogSeverity.Debug: default: color = ConsoleColor.DarkGray; break;
+                }
+
+                //Exception
+                string exMessage;
+                Exception ex = e.Exception;
+                if (ex != null)
+                {
+                    while (ex is AggregateException && ex.InnerException != null)
+                        ex = ex.InnerException;
+                    exMessage = ex.Message;
+                }
+                else
+                    exMessage = null;
+
+                //Source
+                string sourceName = e.Source?.ToString();
+
+                //Text
+                string text;
+                if (e.Message == null)
+                {
+                    text = exMessage ?? "";
+                    exMessage = null;
+                }
+                else
+                    text = e.Message;
+
+                //Build message
+                StringBuilder builder = new StringBuilder(oldText.Length + 1 + text.Length + (sourceName?.Length ?? 0) + (exMessage?.Length ?? 0) + 5);
+                builder.Append(oldText);
+                if (!string.IsNullOrEmpty(oldText))
+                {
+                    builder.Append('\n');
+                }
+                if (sourceName != null)
+                {
+                    builder.Append('[');
+                    builder.Append(sourceName);
+                    builder.Append("] ");
+                }
+                for (int i = 0; i < text.Length; i++)
+                {
+                    //Strip control chars
+                    char c = text[i];
+                    if (!char.IsControl(c))
+                        builder.Append(c);
+                }
+                if (exMessage != null)
+                {
+                    builder.Append(": ");
+                    builder.Append(exMessage);
+                }
+
+                text = builder.ToString();
+            
+                // TODO: colour and filter based on debug/release
+                logTextBlock.Text = text;
+
+                logScrollViewer.ScrollToBottom();
+            }));
         }
     }
 }
