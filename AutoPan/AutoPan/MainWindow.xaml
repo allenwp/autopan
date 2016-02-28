@@ -10,7 +10,7 @@
         <TextBox x:Name="emailTextBox" Height="21" Margin="320,21,10,0" VerticalAlignment="Top" MaxLines="1"/>
         <PasswordBox x:Name="passwordBox" Margin="320,47,10,0" VerticalAlignment="Top" Height="21"/>
         <CheckBox x:Name="savePasswordCheckBox" Content="Save Password" HorizontalAlignment="Left" Margin="320,75,0,0" VerticalAlignment="Top"/>
-        <Button x:Name="loginButton" Content="Log in to Discord" Margin="0,73,10,0" VerticalAlignment="Top" Click="OnLogin" HorizontalAlignment="Right" Width="132" IsDefault="True"/>
+        <Button x:Name="loginButton" Content="Log In to Discord" Margin="0,73,90,0" VerticalAlignment="Top" Click="OnLogin" HorizontalAlignment="Right" Width="132" IsDefault="True"/>
         <Button x:Name="connectButton" Content="Connect to Voice" HorizontalAlignment="Left" Margin="10,165,0,0" VerticalAlignment="Top" Width="103" RenderTransformOrigin="0.514,0.467" Click="OnConnect" IsEnabled="False"/>
         <Image x:Name="image" Source="Graphics/auto-pan-logo.png" Width="250" Height="105" VerticalAlignment="Top" HorizontalAlignment="Left"/>
         <Label x:Name="label" Content="Email:" HorizontalAlignment="Left" Margin="276,23,0,0" VerticalAlignment="Top"/>
@@ -21,6 +21,7 @@
             <TextBlock x:Name="logTextBlock" TextWrapping="Wrap" Background="#FFF7F7F7" Padding="3,3,3,3" />
         </ScrollViewer>
         <Button x:Name="disconnectButton" Content="Disconnect from Voice" HorizontalAlignment="Left" Margin="118,165,0,0" VerticalAlignment="Top" Width="132" IsEnabled="False" Click="OnDisconnect"/>
+        <Button x:Name="logoutButton" Content="Log Out" Margin="584,73,10,0" VerticalAlignment="Top" IsEnabled="False" Click="OnLogout"/>
 
     </Grid>
 </Window>

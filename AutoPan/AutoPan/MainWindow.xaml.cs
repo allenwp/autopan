@@ -28,6 +28,8 @@ namespace AutoPan
         DiscordClient client = null;
         Channel channel = null;
 
+        List<Channel> channels = new List<Channel>();
+
         UIState state = UIState.LoggedOut;
         UIState State
         {
@@ -46,6 +48,8 @@ namespace AutoPan
                         loginButton.IsEnabled = false;
                         savePasswordCheckBox.IsEnabled = false;
 
+                        logoutButton.IsEnabled = true;
+
                         channelComboBox.IsEnabled = true;
                         connectButton.IsEnabled = true;
 
@@ -56,6 +60,8 @@ namespace AutoPan
                         passwordBox.IsEnabled = false;
                         loginButton.IsEnabled = false;
                         savePasswordCheckBox.IsEnabled = false;
+
+                        logoutButton.IsEnabled = true;
 
                         channelComboBox.IsEnabled = false;
                         connectButton.IsEnabled = false;
@@ -68,6 +74,8 @@ namespace AutoPan
                         loginButton.IsEnabled = false;
                         savePasswordCheckBox.IsEnabled = false;
 
+                        logoutButton.IsEnabled = false;
+
                         channelComboBox.IsEnabled = false;
                         connectButton.IsEnabled = false;
 
@@ -79,6 +87,8 @@ namespace AutoPan
                         passwordBox.IsEnabled = true;
                         loginButton.IsEnabled = true;
                         savePasswordCheckBox.IsEnabled = true;
+
+                        logoutButton.IsEnabled = false;
 
                         channelComboBox.IsEnabled = false;
                         connectButton.IsEnabled = false;
@@ -118,8 +128,32 @@ namespace AutoPan
             try
             {
                 await client.Connect(emailTextBox.Text, passwordBox.Password);
-                client.SetGame("Auto Pan");
-                State = UIState.LoggedIn;
+                client.SetGame("Auto Pan"); // TODO: Only do this if a bot is needed for Auto Pan
+
+                channels.Clear();
+                List<string> comboItems = new List<string>();
+
+                foreach (Server server in client.Servers)
+                {
+                    foreach (Channel c in server.VoiceChannels)
+                    {
+                        channels.Add(c);
+                        comboItems.Add(string.Format("[{0}] {1}", server.Name, c.Name));
+                    }
+                }
+
+                if(channels.Count != 0)
+                {
+                    channelComboBox.ItemsSource = comboItems;
+                    channelComboBox.SelectedIndex = 0;
+                    State = UIState.LoggedIn;
+                }
+                else
+                {
+                    client.Log.Error($"Login failed because this user has no voice channels to connect to!", null);
+                    State = UIState.LoggedOut;
+                }
+
             }
             catch (Exception ex)
             {
@@ -131,27 +165,11 @@ namespace AutoPan
         private async void OnConnect(object sender, RoutedEventArgs e)
         {
             State = UIState.Connecting;
-            bool hasConnected = false;
             try
             {
-                foreach (Server server in client.Servers)
-                {
-                    foreach (Channel channel in server.TextChannels)
-                    {
-                        await channel.SendMessage("'sup?");
-                    }
-
-                    if (!hasConnected)
-                    {
-                        foreach (Channel channel in server.VoiceChannels)
-                        {
-                            this.channel = channel;
-                            IAudioClient audioClient = await channel.JoinAudio();
-                            hasConnected = true;
-                            State = UIState.ConnectedToChannel;
-                        }
-                    }
-                }
+                this.channel = channels[channelComboBox.SelectedIndex];
+                IAudioClient audioClient = await channel.JoinAudio();
+                State = UIState.ConnectedToChannel;
             }
             catch (Exception ex)
             {
@@ -166,16 +184,16 @@ namespace AutoPan
             {
                 string oldText = logTextBlock.Text;
 
-                //Color
-                ConsoleColor color;
-                switch (e.Severity)
-                {
-                    case LogSeverity.Error: color = ConsoleColor.Red; break;
-                    case LogSeverity.Warning: color = ConsoleColor.Yellow; break;
-                    case LogSeverity.Info: color = ConsoleColor.White; break;
-                    case LogSeverity.Verbose: color = ConsoleColor.Gray; break;
-                    case LogSeverity.Debug: default: color = ConsoleColor.DarkGray; break;
-                }
+                ////Color
+                //ConsoleColor color;
+                //switch (e.Severity)
+                //{
+                //    case LogSeverity.Error: color = ConsoleColor.Red; break;
+                //    case LogSeverity.Warning: color = ConsoleColor.Yellow; break;
+                //    case LogSeverity.Info: color = ConsoleColor.White; break;
+                //    case LogSeverity.Verbose: color = ConsoleColor.Gray; break;
+                //    case LogSeverity.Debug: default: color = ConsoleColor.DarkGray; break;
+                //}
 
                 //Exception
                 string exMessage;
@@ -251,6 +269,19 @@ namespace AutoPan
                 State = UIState.ConnectedToChannel; // Maaaybe?? Who knows what the state is here...
             }
         }
-        
+
+        private async void OnLogout(object sender, RoutedEventArgs e)
+        {
+            State = UIState.Connecting;
+            try
+            {
+                await client.Disconnect();
+            }
+            catch (Exception ex)
+            {
+                client.Log.Error($"Got an error while trying to log out.", ex);
+            }
+            State = UIState.LoggedOut;
+        }
     }
 }
