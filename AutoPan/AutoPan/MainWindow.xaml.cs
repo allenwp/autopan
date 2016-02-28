@@ -23,7 +23,71 @@ namespace AutoPan
     /// </summary>
     public partial class MainWindow : Window
     {
+        enum UIState { LoggedOut, Connecting, LoggedIn, ConnectedToChannel }
+
         DiscordClient client = null;
+        Channel channel = null;
+
+        UIState state = UIState.LoggedOut;
+        UIState State
+        {
+            get
+            {
+                return state;
+            }
+            set
+            {
+                state = value;
+                switch (state)
+                {
+                    case UIState.LoggedIn:
+                        emailTextBox.IsEnabled = false;
+                        passwordBox.IsEnabled = false;
+                        loginButton.IsEnabled = false;
+                        savePasswordCheckBox.IsEnabled = false;
+
+                        channelComboBox.IsEnabled = true;
+                        connectButton.IsEnabled = true;
+
+                        disconnectButton.IsEnabled = false;
+                        break;
+                    case UIState.ConnectedToChannel:
+                        emailTextBox.IsEnabled = false;
+                        passwordBox.IsEnabled = false;
+                        loginButton.IsEnabled = false;
+                        savePasswordCheckBox.IsEnabled = false;
+
+                        channelComboBox.IsEnabled = false;
+                        connectButton.IsEnabled = false;
+
+                        disconnectButton.IsEnabled = true;
+                        break;
+                    case UIState.Connecting:
+                        emailTextBox.IsEnabled = false;
+                        passwordBox.IsEnabled = false;
+                        loginButton.IsEnabled = false;
+                        savePasswordCheckBox.IsEnabled = false;
+
+                        channelComboBox.IsEnabled = false;
+                        connectButton.IsEnabled = false;
+
+                        disconnectButton.IsEnabled = false;
+                        break;
+                    case UIState.LoggedOut:
+                    default:
+                        emailTextBox.IsEnabled = true;
+                        passwordBox.IsEnabled = true;
+                        loginButton.IsEnabled = true;
+                        savePasswordCheckBox.IsEnabled = true;
+
+                        channelComboBox.IsEnabled = false;
+                        connectButton.IsEnabled = false;
+
+                        disconnectButton.IsEnabled = false;
+                        break;
+                }
+            }
+        }
 
         public MainWindow()
         {
@@ -32,49 +96,47 @@ namespace AutoPan
 
         private async void OnLogin(object sender, RoutedEventArgs e)
         {
-            while (true)
+            State = UIState.Connecting;
+            client = new DiscordClient(x =>
             {
-                client = new DiscordClient(x =>
-                {
-                    x.AppName = "Auto Pan";
-                    x.AppUrl = "http://allenwp.github.io/autopan";
-                    x.MessageCacheSize = 0;
-                    x.UsePermissionsCache = false;
-                    x.EnablePreUpdateEvents = true;
-                    x.LogLevel = LogSeverity.Info;
-                    x.LogHandler = OnLogMessage;
-                })
-                .UsingAudio(x =>
-                {
-                    x.Mode = AudioMode.Incoming;
-                    x.EnableMultiserver = false;
-                    x.EnableEncryption = true;
-                })
-                .AddService<HttpService>();
+                x.AppName = "Auto Pan";
+                x.AppUrl = "http://allenwp.github.io/autopan";
+                x.MessageCacheSize = 0;
+                x.UsePermissionsCache = false;
+                x.EnablePreUpdateEvents = true;
+                x.LogLevel = LogSeverity.Info;
+                x.LogHandler = OnLogMessage;
+            })
+            .UsingAudio(x =>
+            {
+                x.Mode = AudioMode.Incoming;
+                x.EnableMultiserver = false;
+                x.EnableEncryption = true;
+            })
+            .AddService<HttpService>();
 
-                try
-                {
-                    await client.Connect(emailTextBox.Text, passwordBox.Password);
-                    client.SetGame("Auto Pan");
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    client.Log.Error($"Login Failed", ex);
-                    await Task.Delay(client.Config.FailedReconnectDelay);
-                }
+            try
+            {
+                await client.Connect(emailTextBox.Text, passwordBox.Password);
+                client.SetGame("Auto Pan");
+                State = UIState.LoggedIn;
+            }
+            catch (Exception ex)
+            {
+                client.Log.Error($"Login Failed", ex);
+                State = UIState.LoggedOut;
             }
         }
 
         private async void OnConnect(object sender, RoutedEventArgs e)
         {
+            State = UIState.Connecting;
             bool hasConnected = false;
-
             try
             {
                 foreach (Server server in client.Servers)
                 {
-                    foreach (Channel channel in server.AllChannels)
+                    foreach (Channel channel in server.TextChannels)
                     {
                         await channel.SendMessage("'sup?");
                     }
@@ -83,15 +145,18 @@ namespace AutoPan
                     {
                         foreach (Channel channel in server.VoiceChannels)
                         {
+                            this.channel = channel;
                             IAudioClient audioClient = await channel.JoinAudio();
                             hasConnected = true;
+                            State = UIState.ConnectedToChannel;
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                //ruh roh.
+                client.Log.Error($"Failed to connect to voice channel", ex);
+                State = UIState.LoggedIn; // Maaaybe?? Who knows what the state is here...
             }
         }
 
@@ -171,5 +236,21 @@ namespace AutoPan
                 logScrollViewer.ScrollToBottom();
             }));
         }
+
+        private async void OnDisconnect(object sender, RoutedEventArgs e)
+        {
+            State = UIState.Connecting;
+            try
+            {
+                await channel.LeaveAudio();
+                State = UIState.LoggedIn;
+            }
+            catch (Exception ex)
+            {
+                client.Log.Error($"Failed to disconnect from voice channel", ex);
+                State = UIState.ConnectedToChannel; // Maaaybe?? Who knows what the state is here...
+            }
+        }
+        
     }
 }

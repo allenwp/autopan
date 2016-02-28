@@ -11,15 +11,16 @@
         <PasswordBox x:Name="passwordBox" Margin="320,47,10,0" VerticalAlignment="Top" Height="21"/>
         <CheckBox x:Name="savePasswordCheckBox" Content="Save Password" HorizontalAlignment="Left" Margin="320,75,0,0" VerticalAlignment="Top"/>
         <Button x:Name="loginButton" Content="Log in to Discord" Margin="0,73,10,0" VerticalAlignment="Top" Click="OnLogin" HorizontalAlignment="Right" Width="132" IsDefault="True"/>
-        <Button x:Name="connectButton" Content="Connect" HorizontalAlignment="Left" Margin="10,165,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.514,0.467" Click="OnConnect" IsEnabled="False"/>
+        <Button x:Name="connectButton" Content="Connect to Voice" HorizontalAlignment="Left" Margin="10,165,0,0" VerticalAlignment="Top" Width="103" RenderTransformOrigin="0.514,0.467" Click="OnConnect" IsEnabled="False"/>
         <Image x:Name="image" Source="Graphics/auto-pan-logo.png" Width="250" Height="105" VerticalAlignment="Top" HorizontalAlignment="Left"/>
         <Label x:Name="label" Content="Email:" HorizontalAlignment="Left" Margin="276,23,0,0" VerticalAlignment="Top"/>
         <Label x:Name="label1" Content="Password:" HorizontalAlignment="Left" Margin="254,47,0,0" VerticalAlignment="Top"/>
         <ComboBox x:Name="channelComboBox" HorizontalAlignment="Left" Margin="10,138,0,0" VerticalAlignment="Top" Width="240" IsEnabled="False"/>
         <Label x:Name="label2" Content="Connect to Voice Channel:" HorizontalAlignment="Left" Margin="10,111,0,0" VerticalAlignment="Top"/>
-        <ScrollViewer x:Name="logScrollViewer" Margin="10,190,0,10" HorizontalAlignment="Left" Width="250">
+        <ScrollViewer x:Name="logScrollViewer" Margin="10,190,0,10" HorizontalAlignment="Left" Width="240">
             <TextBlock x:Name="logTextBlock" TextWrapping="Wrap" Background="#FFF7F7F7" Padding="3,3,3,3" />
         </ScrollViewer>
+        <Button x:Name="disconnectButton" Content="Disconnect from Voice" HorizontalAlignment="Left" Margin="118,165,0,0" VerticalAlignment="Top" Width="132" IsEnabled="False" Click="OnDisconnect"/>
 
     </Grid>
 </Window>
