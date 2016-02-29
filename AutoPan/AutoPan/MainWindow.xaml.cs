@@ -128,30 +128,54 @@ namespace AutoPan
             try
             {
                 await client.Connect(emailTextBox.Text, passwordBox.Password);
-                client.SetGame("Auto Pan"); // TODO: Only do this if a bot is needed for Auto Pan
-
-                channels.Clear();
-                List<string> comboItems = new List<string>();
-
-                foreach (Server server in client.Servers)
+                
+                bool alreadyInVoice = false;
+                foreach(Server server in client.Servers)
                 {
-                    foreach (Channel c in server.VoiceChannels)
+                    User u = server.GetUser(client.CurrentUser.Id);
+                    if (u != null && u.VoiceChannel != null)
                     {
-                        channels.Add(c);
-                        comboItems.Add(string.Format("[{0}] {1}", server.Name, c.Name));
+                        alreadyInVoice = true;
                     }
                 }
 
-                if(channels.Count != 0)
+                if(alreadyInVoice)
                 {
-                    channelComboBox.ItemsSource = comboItems;
-                    channelComboBox.SelectedIndex = 0;
-                    State = UIState.LoggedIn;
+                    // Discord does not allow a user to be logged into the same voice channel from multiple locations at the same time. (you get booted out of the voice channel in discord client if you connect through a different client)
+                    client.Log.Error($"Login failed because this user is already connected to a voice channel. Please create your own separate \"bot\" account for use with Auto Pan.", null);
+                    State = UIState.LoggedOut;
                 }
                 else
                 {
-                    client.Log.Error($"Login failed because this user has no voice channels to connect to!", null);
-                    State = UIState.LoggedOut;
+                    client.SetGame("Auto Pan"); // TODO: Only do this if a bot is needed for Auto Pan
+
+                    channels.Clear();
+                    List<string> comboItems = new List<string>();
+
+                    foreach (Server server in client.Servers)
+                    {
+                        foreach (Channel c in server.VoiceChannels)
+                        {
+                            channels.Add(c);
+                            comboItems.Add(string.Format("[{0}] {1}", server.Name, c.Name));
+                            //foreach(User u in c.Users)
+                            //{
+                            //    OnLogMessage(this, new LogMessageEventArgs(LogSeverity.Info, "", string.Format("{0} {1} {2}", server.Name, c.Name, u.VoiceChannel), null));
+                            //}
+                        }
+                    }
+
+                    if (channels.Count != 0)
+                    {
+                        channelComboBox.ItemsSource = comboItems;
+                        channelComboBox.SelectedIndex = 0;
+                        State = UIState.LoggedIn;
+                    }
+                    else
+                    {
+                        client.Log.Error($"Login failed because this user has no voice channels to connect to!", null);
+                        State = UIState.LoggedOut;
+                    }
                 }
 
             }
