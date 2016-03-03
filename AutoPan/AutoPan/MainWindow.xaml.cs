@@ -102,6 +102,7 @@ namespace AutoPan
         public MainWindow()
         {
             InitializeComponent();
+            OnLogMessage(this, new LogMessageEventArgs(LogSeverity.Info, "Auto Pan", "Thanks for using Auto Pan! This is version 1 – Keep an eye out for new updates at:\nallenwp.github.io/autopan", null));
         }
 
         private async void OnLogin(object sender, RoutedEventArgs e)
@@ -142,7 +143,7 @@ namespace AutoPan
                 if(alreadyInVoice)
                 {
                     // Discord does not allow a user to be logged into the same voice channel from multiple locations at the same time. (you get booted out of the voice channel in discord client if you connect through a different client)
-                    client.Log.Error($"Login failed because this user is already connected to a voice channel. Please create your own separate \"bot\" account for use with Auto Pan.", null);
+                    client.Log.Error("Login", $"Login failed because this user is already connected to a voice channel. Please create your own separate \"bot\" account for use with Auto Pan.", null);
                     State = UIState.LoggedOut;
                 }
                 else
@@ -173,7 +174,7 @@ namespace AutoPan
                     }
                     else
                     {
-                        client.Log.Error($"Login failed because this user has no voice channels to connect to!", null);
+                        client.Log.Error("Login", $"Login failed because this user has no voice channels to connect to!", null);
                         State = UIState.LoggedOut;
                     }
                 }
@@ -181,7 +182,7 @@ namespace AutoPan
             }
             catch (Exception ex)
             {
-                client.Log.Error($"Login Failed", ex);
+                client.Log.Error("Login", $"Login Failed", ex);
                 State = UIState.LoggedOut;
             }
         }
@@ -197,7 +198,7 @@ namespace AutoPan
             }
             catch (Exception ex)
             {
-                client.Log.Error($"Failed to connect to voice channel", ex);
+                client.Log.Error("Voice Channel", $"Failed to connect to voice channel", ex);
                 State = UIState.LoggedIn; // Maaaybe?? Who knows what the state is here...
             }
         }
@@ -267,7 +268,7 @@ namespace AutoPan
                 {
                     //Strip control chars
                     char c = text[i];
-                    if (!char.IsControl(c))
+                    if (!char.IsControl(c) || c == '\n') // allow newlines
                         builder.Append(c);
                 }
                 if (exMessage != null)
@@ -295,7 +296,7 @@ namespace AutoPan
             }
             catch (Exception ex)
             {
-                client.Log.Error($"Failed to disconnect from voice channel", ex);
+                client.Log.Error("Voice Channel", $"Failed to disconnect from voice channel", ex);
                 State = UIState.ConnectedToChannel; // Maaaybe?? Who knows what the state is here...
             }
         }
@@ -309,7 +310,7 @@ namespace AutoPan
             }
             catch (Exception ex)
             {
-                client.Log.Error($"Got an error while trying to log out.", ex);
+                client.Log.Error("Log Out", $"Got an error while trying to log out.", ex);
             }
             State = UIState.LoggedOut;
         }
