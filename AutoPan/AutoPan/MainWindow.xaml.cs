@@ -208,6 +208,12 @@ namespace AutoPan
             {
                 string oldText = logTextBlock.Text;
 
+                int maxExistingLength = 1000;
+                if(oldText.Length > maxExistingLength)
+                {
+                    oldText = oldText.Substring(oldText.Length - maxExistingLength, maxExistingLength);
+                }
+
                 ////Color
                 //ConsoleColor color;
                 //switch (e.Severity)
@@ -249,7 +255,7 @@ namespace AutoPan
                 builder.Append(oldText);
                 if (!string.IsNullOrEmpty(oldText))
                 {
-                    builder.Append('\n');
+                    builder.Append("\n\n");
                 }
                 if (sourceName != null)
                 {
