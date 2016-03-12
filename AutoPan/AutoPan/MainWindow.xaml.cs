@@ -102,7 +102,8 @@ namespace AutoPan
         public MainWindow()
         {
             InitializeComponent();
-            OnLogMessage(this, new LogMessageEventArgs(LogSeverity.Info, "Auto Pan", "Thanks for using Auto Pan! This is version 1 – Keep an eye out for new updates at:\nallenwp.github.io/autopan", null));
+            OnLogMessage(this, new LogMessageEventArgs(LogSeverity.Info, "Auto Pan", "Thanks for using Auto Pan! Here's how to set it up: \n\n- Auto Pan requires a secondary Discord user account that has access to the server and voice channel you are using with your primary account. Use this second account to log in above. I recommend adding \"[Auto Pan]\" to the secondary account's username.\n\n- Use Discord normally with your primary account for transmitting your voice.\n\n- Auto Pan will output panned audio from the connected voice channel.\n\n- Mute each individual user in Discord to prevent duplicate audio/echo.\n\nThis is version 1 – Keep an eye out for new updates at: allenwp.github.io/autopan", null));
+            logScrollViewer.ScrollToTop();
         }
 
         private async void OnLogin(object sender, RoutedEventArgs e)
