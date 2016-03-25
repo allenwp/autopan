@@ -3,6 +3,7 @@ using Discord.Audio;
 using Services;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml.Serialization;
 
 namespace AutoPan
 {
@@ -23,12 +25,16 @@ namespace AutoPan
     /// </summary>
     public partial class MainWindow : Window
     {
+        readonly string CONNECTION_SETTINGS_PATH = ".\\ConnectionSettings.xml";
+
         enum UIState { LoggedOut, Connecting, LoggedIn, ConnectedToChannel }
 
         DiscordClient client = null;
         Channel channel = null;
 
         List<Channel> channels = new List<Channel>();
+
+        ConnectionSettings lastSuccessfulConnectionSettings;
 
         UIState state = UIState.LoggedOut;
         UIState State
@@ -102,8 +108,57 @@ namespace AutoPan
         public MainWindow()
         {
             InitializeComponent();
+
+            Closing += MainWindow_Closing;
+
             OnLogMessage(this, new LogMessageEventArgs(LogSeverity.Info, "Auto Pan", "Thanks for using Auto Pan! Here's how to set it up: \n\n- Auto Pan requires a secondary Discord user account that has access to the server and voice channel you are using with your primary account. Use this second account to log in above. I recommend adding \"[Auto Pan]\" to the secondary account's username.\n\n- Use Discord normally with your primary account for transmitting your voice.\n\n- Auto Pan will output panned audio from the connected voice channel.\n\n- Mute each individual user in Discord to prevent duplicate audio/echo.\n\nThis is version 1 – Keep an eye out for new updates at: allenwp.github.io/autopan", null));
             logScrollViewer.ScrollToTop();
+            
+            try
+            {
+                using (StreamReader reader = new StreamReader(CONNECTION_SETTINGS_PATH, Encoding.UTF8))
+                {
+                    XmlSerializer serializer = new XmlSerializer(lastSuccessfulConnectionSettings.GetType());
+                    lastSuccessfulConnectionSettings = (ConnectionSettings)serializer.Deserialize(reader);
+
+                    if(!string.IsNullOrWhiteSpace(lastSuccessfulConnectionSettings.Email))
+                    {
+                        emailTextBox.Text = lastSuccessfulConnectionSettings.Email;
+                        if(!string.IsNullOrWhiteSpace(lastSuccessfulConnectionSettings.Password))
+                        {
+                            passwordBox.Password = lastSuccessfulConnectionSettings.Password;
+                            savePasswordCheckBox.IsChecked = true;
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Just reset to defaults (no settings)
+                lastSuccessfulConnectionSettings = new ConnectionSettings();
+            }
+        }
+
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            // Remove password if they unchecked the save password option after the last login
+            if(savePasswordCheckBox.IsChecked != true)
+            {
+                lastSuccessfulConnectionSettings.Password = string.Empty;
+            }
+
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(CONNECTION_SETTINGS_PATH, false, Encoding.UTF8))
+                {
+                    XmlSerializer serializer = new XmlSerializer(lastSuccessfulConnectionSettings.GetType());
+                    serializer.Serialize(writer, lastSuccessfulConnectionSettings);
+                }
+            }
+            catch (Exception)
+            {
+                // meh, we tried. No big deal if this failed -- might as well just continue to quit.
+            }
         }
 
         private async void OnLogin(object sender, RoutedEventArgs e)
@@ -149,28 +204,39 @@ namespace AutoPan
                 }
                 else
                 {
-                    client.SetGame("Auto Pan"); // TODO: Only do this if a bot is needed for Auto Pan
+                    client.SetGame("Auto Pan"); // Since we know this is a "bot" account, it can be playing a different game than the main user account.
+
+                    lastSuccessfulConnectionSettings.Email = emailTextBox.Text;
+                    lastSuccessfulConnectionSettings.Password = (savePasswordCheckBox.IsChecked == true) ? passwordBox.Password : string.Empty;
 
                     channels.Clear();
                     List<string> comboItems = new List<string>();
 
+                    int selectionIndex = 0;
+                    int comboIndex = 0;
                     foreach (Server server in client.Servers)
                     {
                         foreach (Channel c in server.VoiceChannels)
                         {
                             channels.Add(c);
-                            comboItems.Add(string.Format("[{0}] {1}", server.Name, c.Name));
+                            string channelString = string.Format("[{0}] {1}", server.Name, c.Name);
+                            comboItems.Add(channelString);
+                            if (channelString == lastSuccessfulConnectionSettings.LastVoiceChannel)
+                            {
+                                selectionIndex = comboIndex;
+                            }
                             //foreach(User u in c.Users)
                             //{
                             //    OnLogMessage(this, new LogMessageEventArgs(LogSeverity.Info, "", string.Format("{0} {1} {2}", server.Name, c.Name, u.VoiceChannel), null));
                             //}
+                            comboIndex++;
                         }
                     }
 
                     if (channels.Count != 0)
                     {
                         channelComboBox.ItemsSource = comboItems;
-                        channelComboBox.SelectedIndex = 0;
+                        channelComboBox.SelectedIndex = selectionIndex;
                         State = UIState.LoggedIn;
                     }
                     else
@@ -196,6 +262,7 @@ namespace AutoPan
                 this.channel = channels[channelComboBox.SelectedIndex];
                 IAudioClient audioClient = await channel.JoinAudio();
                 State = UIState.ConnectedToChannel;
+                lastSuccessfulConnectionSettings.LastVoiceChannel = channelComboBox.SelectedItem.ToString();
             }
             catch (Exception ex)
             {
