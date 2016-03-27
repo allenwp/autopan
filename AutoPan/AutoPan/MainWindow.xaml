@@ -37,12 +37,13 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Grid Background="#f2f5fc" Margin="10,0,10,10">
-                            <CheckBox IsChecked="{Binding Audible}" Content="{Binding Name}" Margin="10,10,10,0" VerticalAlignment="Top" />
-                            <Label Content="Volume: " Margin="10,30,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="62" />
-                            <Slider Value="{Binding Volume}" ToolTip="{Binding Volume}" Margin="77,34,10,0" VerticalAlignment="Top" Maximum="200" SmallChange="1" TickFrequency="20" TickPlacement="BottomRight" />
+                            <CheckBox IsChecked="{Binding Audible}" Margin="10,14,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16" Margin="31,10,10,0" VerticalAlignment="Top" />
+                            <Label Content="Volume: " Margin="10,35,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="62" />
+                            <Slider Value="{Binding Volume}" ToolTip="{Binding Volume}" Margin="77,39,10,0" VerticalAlignment="Top" Maximum="200" SmallChange="1" LargeChange="10" TickFrequency="20" TickPlacement="BottomRight" />
                             <CheckBox IsChecked="{Binding AutoPan}" Content="Auto-Pan" Margin="10,67,10,0" VerticalAlignment="Top" />
-                            <Label Content="Pan: " Margin="10,82,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="62" />
-                            <Slider Value="{Binding Pan}" ToolTip="{Binding Pan}" Margin="77,86,10,10" VerticalAlignment="Top" Minimum="-1" Maximum="1" SmallChange=".1" TickFrequency=".2" TickPlacement="BottomRight" />
+                            <Label Content="Pan: " Margin="10,84,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="62" />
+                            <Slider Value="{Binding Pan}" ToolTip="{Binding Pan}" Margin="77,88,10,10" VerticalAlignment="Top" Minimum="-1" Maximum="1" SmallChange=".01" LargeChange=".1" TickFrequency=".2" TickPlacement="BottomRight" />
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
@@ -50,7 +51,7 @@
         </ScrollViewer>
 
         <!-- for building datatemplate -->
-        <!--<Grid Margin="294,282,0,0">
+        <!--<Grid Margin="294,282,32,0" Background="#f2f5fc">
         </Grid>-->
 
         <!-- mode=TwoWay -->
