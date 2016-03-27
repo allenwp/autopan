@@ -89,6 +89,7 @@
     </ApplicationDefinition>
     <Compile Include="ConnectionSettings.cs" />
     <Compile Include="Services\HttpService.cs" />
+    <Compile Include="UserSettings.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

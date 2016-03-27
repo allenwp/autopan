@@ -36,6 +36,16 @@ namespace AutoPan
 
         ConnectionSettings lastSuccessfulConnectionSettings;
 
+        /// <summary>
+        /// Serialized and saved copy of all previous user settings. This includes settings for users that are not in the current channel.
+        /// </summary>
+        Dictionary<string, UserSettings> SavedUserSettings;
+
+        /// <summary>
+        /// Data that matches the users in the current voice channel (and therefore the view as well).
+        /// </summary>
+        List<UserSettings> ChannelUserSettings;
+
         UIState state = UIState.LoggedOut;
         UIState State
         {
@@ -108,6 +118,26 @@ namespace AutoPan
         public MainWindow()
         {
             InitializeComponent();
+
+            // temp test:
+            ChannelUserSettings = new List<UserSettings>();
+            ChannelUserSettings.Add(new UserSettings(23));
+            ChannelUserSettings.Add(new UserSettings(78));
+            ChannelUserSettings.Add(new UserSettings(654));
+            ChannelUserSettings.Add(new UserSettings(23));
+            ChannelUserSettings.Add(new UserSettings(78));
+            ChannelUserSettings.Add(new UserSettings(654));
+            ChannelUserSettings.Add(new UserSettings(23));
+            ChannelUserSettings.Add(new UserSettings(78));
+            ChannelUserSettings.Add(new UserSettings(654));
+            ChannelUserSettings.Add(new UserSettings(23));
+            ChannelUserSettings.Add(new UserSettings(78));
+            ChannelUserSettings.Add(new UserSettings(654));
+            ChannelUserSettings.Add(new UserSettings(23));
+            ChannelUserSettings.Add(new UserSettings(78));
+            ChannelUserSettings.Add(new UserSettings(654));
+
+            DataContext = ChannelUserSettings;
 
             Closing += MainWindow_Closing;
 
