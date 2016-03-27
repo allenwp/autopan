@@ -8,6 +8,13 @@ namespace AutoPan
 {
     public class UserSettings
     {
+        /// <summary>
+        /// For serialization
+        /// </summary>
+        private UserSettings()
+        {
+        }
+
         public UserSettings(ulong id)
         {
             this.id = id;
@@ -15,13 +22,17 @@ namespace AutoPan
 
         private ulong id;
         /// <summary>
-        /// Unique Discord ID for user.
+        /// Unique Discord ID for user. Setter is just for serialization. You shouldn't actually change this.
         /// </summary>
         public ulong Id
         {
             get
             {
                 return id;
+            }
+            set
+            {
+                id = value;
             }
         }
 

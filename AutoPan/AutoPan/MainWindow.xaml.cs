@@ -27,6 +27,7 @@ namespace AutoPan
     public partial class MainWindow : Window
     {
         readonly string CONNECTION_SETTINGS_PATH = ".\\ConnectionSettings.xml";
+        readonly string USER_SETTINGS_PATH = ".\\UserSettings.xml";
 
         enum UIState { LoggedOut, Connecting, LoggedIn, ConnectedToChannel }
 
@@ -40,12 +41,12 @@ namespace AutoPan
         /// <summary>
         /// Serialized and saved copy of all previous user settings. This includes settings for users that are not in the current channel.
         /// </summary>
-        Dictionary<string, UserSettings> SavedUserSettings;
+        Dictionary<ulong, UserSettings> savedUserSettings;
 
         /// <summary>
         /// Data that matches the users in the current voice channel (and therefore the view as well).
         /// </summary>
-        ObservableCollection<UserSettings> ChannelUserSettings = new ObservableCollection<UserSettings>();
+        ObservableCollection<UserSettings> connectedUserSettings = new ObservableCollection<UserSettings>();
 
         UIState state = UIState.LoggedOut;
         UIState State
@@ -120,13 +121,19 @@ namespace AutoPan
         {
             InitializeComponent();
 
-            DataContext = ChannelUserSettings;
+            DataContext = connectedUserSettings;
 
             Closing += MainWindow_Closing;
 
             OnLogMessage(this, new LogMessageEventArgs(LogSeverity.Info, "Auto Pan", "Thanks for using Auto Pan! Here's how to set it up: \n\n- Auto Pan requires you to create a second Discord user account. I recommend adding \"[Auto Pan]\" it's username.\n\n-Your second account needs access to the server and voice channel you are using with your primary account.\n\n-Use this second account to log in above.\n\n- Auto Pan will output panned audio from the voice channel it's connected to.\n\n- Use Discord normally with your primary account for transmitting your voice.\n\n- Mute each individual user in Discord to prevent duplicate audio/echo.\n\nThis is version 1 – Keep an eye out for new updates at: allenwp.github.io/autopan", null));
             logScrollViewer.ScrollToTop();
-            
+
+            LoadConnectionSettings();
+            LoadUserSettings();
+        }
+
+        private void LoadConnectionSettings()
+        {
             try
             {
                 using (StreamReader reader = new StreamReader(CONNECTION_SETTINGS_PATH, Encoding.UTF8))
@@ -134,10 +141,10 @@ namespace AutoPan
                     XmlSerializer serializer = new XmlSerializer(lastSuccessfulConnectionSettings.GetType());
                     lastSuccessfulConnectionSettings = (ConnectionSettings)serializer.Deserialize(reader);
 
-                    if(!string.IsNullOrWhiteSpace(lastSuccessfulConnectionSettings.Email))
+                    if (!string.IsNullOrWhiteSpace(lastSuccessfulConnectionSettings.Email))
                     {
                         emailTextBox.Text = lastSuccessfulConnectionSettings.Email;
-                        if(!string.IsNullOrWhiteSpace(lastSuccessfulConnectionSettings.Password))
+                        if (!string.IsNullOrWhiteSpace(lastSuccessfulConnectionSettings.Password))
                         {
                             passwordBox.Password = lastSuccessfulConnectionSettings.Password;
                             savePasswordCheckBox.IsChecked = true;
@@ -152,6 +159,28 @@ namespace AutoPan
             }
         }
 
+        private void LoadUserSettings()
+        {
+            try
+            {
+                using (StreamReader reader = new StreamReader(USER_SETTINGS_PATH, Encoding.UTF8))
+                {
+                    savedUserSettings = new Dictionary<ulong, UserSettings>();
+                    XmlSerializer serializer = new XmlSerializer(typeof(UserSettings[]));
+                    UserSettings[] userSettingsArray = (UserSettings[])serializer.Deserialize(reader);
+                    foreach(UserSettings settings in userSettingsArray)
+                    {
+                        savedUserSettings[settings.Id] = settings;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                // Just reset to defaults (no settings)
+                savedUserSettings = new Dictionary<ulong, UserSettings>();
+            }
+        }
+
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             // Remove password if they unchecked the save password option after the last login
@@ -160,6 +189,36 @@ namespace AutoPan
                 lastSuccessfulConnectionSettings.Password = string.Empty;
             }
 
+            // If these fail, it would probably cause more problems if I try to abort quitting the program... Might as well just continue to quit.
+            SaveUserSettings();
+            SaveConnectionSettings();
+        }
+
+        /// <returns>true if succeeded, false otherwise</returns>
+        private bool SaveUserSettings()
+        {
+            bool result = false;
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(USER_SETTINGS_PATH, false, Encoding.UTF8))
+                {
+                    UserSettings[] values = savedUserSettings.Values.ToArray();
+                    XmlSerializer serializer = new XmlSerializer(values.GetType());
+                    serializer.Serialize(writer, values);
+                }
+                result = true;
+            }
+            catch (Exception e)
+            {
+            }
+
+            return result;
+        }
+
+        /// <returns>true if succeeded, false otherwise</returns>
+        private bool SaveConnectionSettings()
+        {
+            bool result = false;
             try
             {
                 using (StreamWriter writer = new StreamWriter(CONNECTION_SETTINGS_PATH, false, Encoding.UTF8))
@@ -167,11 +226,13 @@ namespace AutoPan
                     XmlSerializer serializer = new XmlSerializer(lastSuccessfulConnectionSettings.GetType());
                     serializer.Serialize(writer, lastSuccessfulConnectionSettings);
                 }
+                result = true;
             }
             catch (Exception)
             {
-                // meh, we tried. No big deal if this failed -- might as well just continue to quit.
             }
+
+            return result;
         }
 
         private async void OnLogin(object sender, RoutedEventArgs e)
@@ -290,7 +351,7 @@ namespace AutoPan
                 {
                     if(user.Id != client.CurrentUser.Id)
                     {
-                        ChannelUserSettings.Add(new UserSettings(user.Id) { Name = user.Name });
+                        AddUser(user);
                     }
                 }
             }
@@ -310,6 +371,25 @@ namespace AutoPan
                 }
                 client.Log.Error("Voice Channel", $"Failed to connect to voice channel", ex);
                 State = UIState.LoggedIn; // Maaaybe?? Who knows what the state is here...
+            }
+        }
+
+        private void AddUser(User user)
+        {
+            if(savedUserSettings.ContainsKey(user.Id))
+            {
+                UserSettings settings = savedUserSettings[user.Id];
+
+                // Update the saved name, since that might have changed while they were offline:
+                settings.Name = user.Name;
+
+                connectedUserSettings.Add(savedUserSettings[user.Id]);
+            }
+            else
+            {
+                UserSettings newSettings = new UserSettings(user.Id) { Name = user.Name };
+                savedUserSettings[user.Id] = newSettings;
+                connectedUserSettings.Add(newSettings);
             }
         }
 
@@ -431,7 +511,7 @@ namespace AutoPan
 
         private void CleanupVoiceChannel()
         {
-            ChannelUserSettings.Clear();
+            connectedUserSettings.Clear();
         }
     }
 }
