@@ -3,6 +3,7 @@ using Discord.Audio;
 using Services;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -44,7 +45,7 @@ namespace AutoPan
         /// <summary>
         /// Data that matches the users in the current voice channel (and therefore the view as well).
         /// </summary>
-        List<UserSettings> ChannelUserSettings;
+        ObservableCollection<UserSettings> ChannelUserSettings = new ObservableCollection<UserSettings>();
 
         UIState state = UIState.LoggedOut;
         UIState State
@@ -118,24 +119,6 @@ namespace AutoPan
         public MainWindow()
         {
             InitializeComponent();
-
-            // temp test:
-            ChannelUserSettings = new List<UserSettings>();
-            ChannelUserSettings.Add(new UserSettings(23));
-            ChannelUserSettings.Add(new UserSettings(78));
-            ChannelUserSettings.Add(new UserSettings(654));
-            ChannelUserSettings.Add(new UserSettings(23));
-            ChannelUserSettings.Add(new UserSettings(78));
-            ChannelUserSettings.Add(new UserSettings(654));
-            ChannelUserSettings.Add(new UserSettings(23));
-            ChannelUserSettings.Add(new UserSettings(78));
-            ChannelUserSettings.Add(new UserSettings(654));
-            ChannelUserSettings.Add(new UserSettings(23));
-            ChannelUserSettings.Add(new UserSettings(78));
-            ChannelUserSettings.Add(new UserSettings(654));
-            ChannelUserSettings.Add(new UserSettings(23));
-            ChannelUserSettings.Add(new UserSettings(78));
-            ChannelUserSettings.Add(new UserSettings(654));
 
             DataContext = ChannelUserSettings;
 
@@ -279,6 +262,15 @@ namespace AutoPan
             }
             catch (Exception ex)
             {
+                // Disconnect in case it actually did manage to connect previoulsy.
+                try
+                {
+                    await client.Disconnect();
+                }
+                catch (Exception)
+                {
+                    // We tried. Must not have connected in the first place.
+                }
                 client.Log.Error("Login", $"Login Failed", ex);
                 State = UIState.LoggedOut;
             }
@@ -293,9 +285,29 @@ namespace AutoPan
                 IAudioClient audioClient = await channel.JoinAudio();
                 State = UIState.ConnectedToChannel;
                 lastSuccessfulConnectionSettings.LastVoiceChannel = channelComboBox.SelectedItem.ToString();
+
+                foreach(var user in channel.Users)
+                {
+                    if(user.Id != client.CurrentUser.Id)
+                    {
+                        ChannelUserSettings.Add(new UserSettings(user.Id) { Name = user.Name });
+                    }
+                }
             }
             catch (Exception ex)
             {
+                // in case it's actually already connected:
+                if (channel != null)
+                {
+                    try
+                    {
+                        await channel.LeaveAudio();
+                    }
+                    catch (Exception)
+                    {
+                        // we tried. Maybe they just never connected in the first place.
+                    }
+                }
                 client.Log.Error("Voice Channel", $"Failed to connect to voice channel", ex);
                 State = UIState.LoggedIn; // Maaaybe?? Who knows what the state is here...
             }
@@ -391,6 +403,8 @@ namespace AutoPan
             {
                 await channel.LeaveAudio();
                 State = UIState.LoggedIn;
+
+                CleanupVoiceChannel();
             }
             catch (Exception ex)
             {
@@ -411,6 +425,13 @@ namespace AutoPan
                 client.Log.Error("Log Out", $"Got an error while trying to log out.", ex);
             }
             State = UIState.LoggedOut;
+
+            CleanupVoiceChannel();
+        }
+
+        private void CleanupVoiceChannel()
+        {
+            ChannelUserSettings.Clear();
         }
     }
 }
