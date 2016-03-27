@@ -174,7 +174,7 @@ namespace AutoPan
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // Just reset to defaults (no settings)
                 savedUserSettings = new Dictionary<ulong, UserSettings>();
@@ -208,7 +208,7 @@ namespace AutoPan
                 }
                 result = true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
             }
 

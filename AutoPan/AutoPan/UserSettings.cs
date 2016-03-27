@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace AutoPan
 {
@@ -22,7 +23,8 @@ namespace AutoPan
 
         private ulong id;
         /// <summary>
-        /// Unique Discord ID for user. Setter is just for serialization. You shouldn't actually change this.
+        /// Unique Discord ID for user.
+        /// Setter should be private, but is public for serialization.
         /// </summary>
         public ulong Id
         {
@@ -91,11 +93,11 @@ namespace AutoPan
             }
         }
         
-        [NonSerialized]
         private float pan = 0;
         /// <summary>
         /// Range: -1 to 1. Center is 0, Left is -1, Right is 1.
         /// </summary>
+        [XmlIgnore]
         public float Pan
         {
             get
@@ -116,14 +118,26 @@ namespace AutoPan
         /// <summary>
         /// Used for remembering what the last manual pan was when switching between manual and auto-pan.
         /// Range: -1 to 1. Center is 0, Left is -1, Right is 1.
+        /// Setter should be private, but is public for serialization.
         /// </summary>
-        float lastManualPan = 0;
-
-        [NonSerialized]
+        private float lastManualPan = 0;
+        public float LastManualPan
+        {
+            get
+            {
+                return lastManualPan;
+            }
+            set
+            {
+                lastManualPan = value;
+            }
+        }
+        
         private string name = string.Empty;
         /// <summary>
         /// User name may change at anytime.
         /// </summary>
+        [XmlIgnore]
         public string Name
         {
             get
