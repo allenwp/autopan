@@ -47,7 +47,7 @@ namespace AutoPan
             {
                 return id;
             }
-            set
+            set // Only intended for serialization
             {
                 id = value;
             }
@@ -160,7 +160,7 @@ namespace AutoPan
             {
                 return lastManualPan;
             }
-            set
+            set // Only intended for serialization
             {
                 lastManualPan = value;
             }
