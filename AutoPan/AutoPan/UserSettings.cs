@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,7 +8,7 @@ using System.Xml.Serialization;
 
 namespace AutoPan
 {
-    public class UserSettings
+    public class UserSettings : INotifyPropertyChanged
     {
         /// <summary>
         /// For serialization
@@ -20,6 +21,20 @@ namespace AutoPan
         {
             this.id = id;
         }
+
+        #region INotifyPropertyChanged
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String info)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(info));
+            }
+        }
+
+        #endregion
 
         private ulong id;
         /// <summary>
@@ -51,6 +66,9 @@ namespace AutoPan
             set
             {
                 audible = value;
+
+                NotifyPropertyChanged("Audible");
+                NotifyPropertyChanged("ManualPanAvailable");
             }
         }
 
@@ -68,6 +86,8 @@ namespace AutoPan
             set
             {
                 volume = value;
+
+                NotifyPropertyChanged("Volume");
             }
         }
 
@@ -90,9 +110,20 @@ namespace AutoPan
                 {
                     Pan = lastManualPan;
                 }
+
+                NotifyPropertyChanged("AutoPan");
+                NotifyPropertyChanged("ManualPanAvailable");
             }
         }
-        
+
+        public bool ManualPanAvailable
+        {
+            get
+            {
+                return audible && !autoPan;
+            }
+        }
+
         private float pan = 0;
         /// <summary>
         /// Range: -1 to 1. Center is 0, Left is -1, Right is 1.
@@ -112,6 +143,8 @@ namespace AutoPan
                 {
                     lastManualPan = value;
                 }
+
+                NotifyPropertyChanged("Pan");
             }
         }
 
@@ -148,6 +181,8 @@ namespace AutoPan
             set
             {
                 name = value;
+
+                NotifyPropertyChanged("Name");
             }
         }
 
@@ -163,6 +198,8 @@ namespace AutoPan
             set
             {
                 userIsSpeaking = value;
+
+                NotifyPropertyChanged("UserIsSpeaking");
             }
         }
     }
