@@ -32,6 +32,7 @@ namespace AutoPan
         enum UIState { LoggedOut, Connecting, LoggedIn, ConnectedToChannel }
 
         DiscordClient client = null;
+        IAudioClient audioClient = null;
         Channel channel = null;
 
         List<Channel> channels = new List<Channel>();
@@ -256,6 +257,20 @@ namespace AutoPan
             })
             .AddService<HttpService>();
 
+            client.UserUpdated += Client_UserUpdated;
+
+            // The only way I know how to get the audioService right now to subscribe to the userIsSpeakingUpdated thingy
+            AudioService audioService = null;
+            foreach (var service in client.Services)
+            {
+                audioService = service as AudioService;
+                if(audioService != null)
+                {
+                    audioService.UserIsSpeakingUpdated += AudioService_UserIsSpeakingUpdated;
+                    break;
+                }
+            }
+
             try
             {
                 await client.Connect(emailTextBox.Text, passwordBox.Password);
@@ -337,22 +352,62 @@ namespace AutoPan
             }
         }
 
+        private void AudioService_UserIsSpeakingUpdated(object sender, UserIsSpeakingEventArgs e)
+        {
+            if(savedUserSettings.ContainsKey(e.User.Id))
+            {
+                savedUserSettings[e.User.Id].UserIsSpeaking = e.IsSpeaking;
+            }
+        }
+
+        private void Client_UserUpdated(object sender, UserUpdatedEventArgs e)
+        {
+            // Update name if it's changed:
+            // TODO: Test this more... Can't change my username too fast with Discord...
+            if (e.Before.Name != e.After.Name
+                && savedUserSettings.ContainsKey(e.After.Id))
+            {
+                savedUserSettings[e.After.Id].Name = e.After.Name;
+            }
+            
+            if (e.Before.VoiceChannel == channel && e.After.VoiceChannel != channel)
+            {
+                // User has left voice
+                Dispatcher.Invoke((Action)(() =>
+                {
+                    UserSettings settingsToRemove = null;
+                    foreach (var userSettings in connectedUserSettings)
+                    {
+                        if (e.After.Id == userSettings.Id)
+                        {
+                            settingsToRemove = userSettings;
+                            break;
+                        }
+                    }
+                    connectedUserSettings.Remove(settingsToRemove);
+                }));
+            }
+            else if (e.Before.VoiceChannel != channel && e.After.VoiceChannel == channel)
+            {
+                // User joined this voice channel or has changed voice channel to join this channel
+                AddUser(e.After);
+            }
+        }
+
         private async void OnConnect(object sender, RoutedEventArgs e)
         {
             State = UIState.Connecting;
             try
             {
                 this.channel = channels[channelComboBox.SelectedIndex];
-                IAudioClient audioClient = await channel.JoinAudio();
+                audioClient = await channel.JoinAudio();
+                
                 State = UIState.ConnectedToChannel;
                 lastSuccessfulConnectionSettings.LastVoiceChannel = channelComboBox.SelectedItem.ToString();
 
                 foreach(var user in channel.Users)
                 {
-                    if(user.Id != client.CurrentUser.Id)
-                    {
-                        AddUser(user);
-                    }
+                    AddUser(user);
                 }
             }
             catch (Exception ex)
@@ -376,20 +431,26 @@ namespace AutoPan
 
         private void AddUser(User user)
         {
-            if(savedUserSettings.ContainsKey(user.Id))
+            if (user.Id != client.CurrentUser.Id)
             {
-                UserSettings settings = savedUserSettings[user.Id];
+                Dispatcher.Invoke((Action)(() =>
+                {
+                    if (savedUserSettings.ContainsKey(user.Id))
+                    {
+                        UserSettings settings = savedUserSettings[user.Id];
 
-                // Update the saved name, since that might have changed while they were offline:
-                settings.Name = user.Name;
+                        // Update the saved name, since that might have changed while they were offline:
+                        settings.Name = user.Name;
 
-                connectedUserSettings.Add(savedUserSettings[user.Id]);
-            }
-            else
-            {
-                UserSettings newSettings = new UserSettings(user.Id) { Name = user.Name };
-                savedUserSettings[user.Id] = newSettings;
-                connectedUserSettings.Add(newSettings);
+                        connectedUserSettings.Add(savedUserSettings[user.Id]);
+                    }
+                    else
+                    {
+                        UserSettings newSettings = new UserSettings(user.Id) { Name = user.Name };
+                        savedUserSettings[user.Id] = newSettings;
+                        connectedUserSettings.Add(newSettings);
+                    }
+                }));
             }
         }
 
@@ -512,6 +573,7 @@ namespace AutoPan
         private void CleanupVoiceChannel()
         {
             connectedUserSettings.Clear();
+            audioClient = null;
         }
     }
 }

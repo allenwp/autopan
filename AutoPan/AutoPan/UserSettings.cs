@@ -150,5 +150,20 @@ namespace AutoPan
                 name = value;
             }
         }
+
+        private bool userIsSpeaking = false;
+        [XmlIgnore]
+        public bool UserIsSpeaking
+        {
+            get
+            {
+                return userIsSpeaking;
+            }
+
+            set
+            {
+                userIsSpeaking = value;
+            }
+        }
     }
 }
