@@ -172,6 +172,7 @@ namespace AutoPan
                     foreach(UserSettings settings in userSettingsArray)
                     {
                         savedUserSettings[settings.Id] = settings;
+                        settings.PropertyChanged += Settings_PropertyChanged; // We need to be subscribed to all of these to know when auto panning needs to happen.
                     }
                 }
             }
@@ -444,6 +445,9 @@ namespace AutoPan
                         settings.Name = user.Name;
 
                         settingsToAdd = savedUserSettings[user.Id];
+
+                        // listen for when to trigger an auto pan
+                        settings.PropertyChanged += Settings_PropertyChanged;
                     }
                     else
                     {
@@ -603,12 +607,20 @@ namespace AutoPan
             }
         }
 
+        private void Settings_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if("Audible" == e.PropertyName || "AutoPan" == e.PropertyName)
+            {
+                AutoPan();
+            }
+        }
+
         private void AutoPan()
         {
             int numberOfAutoPans = 0;
             foreach(var userSetting in connectedUserSettings)
             {
-                if(userSetting.AutoPan)
+                if(userSetting.Audible && userSetting.AutoPan)
                 {
                     numberOfAutoPans++;
                 }
@@ -619,7 +631,7 @@ namespace AutoPan
                 int autoPanCounter = 0;
                 foreach (var userSetting in connectedUserSettings)
                 {
-                    if (userSetting.AutoPan)
+                    if (userSetting.Audible && userSetting.AutoPan)
                     {
                         float pan = 0;
                         if (numberOfAutoPans > 1)
