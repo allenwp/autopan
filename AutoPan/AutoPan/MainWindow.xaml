@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AutoPan"
         mc:Ignorable="d"
-        Title="Auto Pan for Discord" Height="543.66" Width="677.305">
+        Title="Auto Pan for Discord" Width="662.138" Height="516.876">
     <Grid>
         <Image x:Name="image" Source="Graphics/auto-pan-logo.png" Width="250" Height="105" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,0,0,0"/>
 
@@ -36,17 +36,17 @@
             <ItemsControl ItemsSource="{Binding}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Grid Background="#f2f5fc" Margin="10,0,10,10">
-                            <Border x:Name="UserBorder" BorderThickness="5" HorizontalAlignment="Stretch" Margin="0,0,0,0" VerticalAlignment="Stretch" />
-                            <CheckBox IsChecked="{Binding Audible}" Margin="10,14,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16" Margin="31,10,10,0" VerticalAlignment="Top" />
-                            <Label Content="Volume: " IsEnabled="{Binding Audible}" Margin="10,35,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="62" />
-                            <Slider Value="{Binding Volume}" IsEnabled="{Binding Audible}" ToolTip="{Binding Volume}" Margin="77,39,10,0" VerticalAlignment="Top" Maximum="200" SmallChange="1" LargeChange="10" TickFrequency="20" TickPlacement="BottomRight" MouseDoubleClick="OnResetVolumeSlider" />
-                            <CheckBox IsChecked="{Binding AutoPan}" IsEnabled="{Binding Audible}" Content="Auto-Pan" Margin="10,67,10,0" VerticalAlignment="Top" />
-                            <Label Content="Pan: " IsEnabled="{Binding ManualPanAvailable}" Margin="10,84,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="62" />
-                            <Slider Value="{Binding Pan}" IsEnabled="{Binding ManualPanAvailable}" ToolTip="{Binding Pan}" Margin="77,88,10,10" VerticalAlignment="Top" Minimum="-1" Maximum="1" SmallChange=".01" LargeChange=".1" TickFrequency=".2" TickPlacement="BottomRight" MouseDoubleClick="OnResetPanSlider" />
-                        </Grid>
-                        <DataTemplate.Triggers>
+            <Grid Background="#f2f5fc" Margin="10,0,10,10">
+                <Border x:Name="UserBorder" BorderThickness="5" HorizontalAlignment="Stretch" Margin="0,0,0,0" VerticalAlignment="Stretch" />
+                <CheckBox IsChecked="{Binding Audible}" Margin="10,14,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16" Margin="31,10,10,0" VerticalAlignment="Top" />
+                <Label Content="Volume: " IsEnabled="{Binding Audible}" Margin="6,35,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="62" />
+                <Slider Value="{Binding Volume}" IsEnabled="{Binding Audible}" ToolTip="{Binding Volume}" Margin="64,39,10,0" VerticalAlignment="Top" Maximum="200" SmallChange="1" LargeChange="10" TickFrequency="20" TickPlacement="BottomRight" MouseDoubleClick="OnResetVolumeSlider" />
+                <CheckBox IsChecked="{Binding AutoPan}" IsEnabled="{Binding Audible}" Content="Auto-Pan" Margin="10,67,10,0" VerticalAlignment="Top" />
+                <Label Content="Pan: " IsEnabled="{Binding ManualPanAvailable}" Margin="6,84,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="62" />
+                <Slider Value="{Binding Pan}" IsEnabled="{Binding ManualPanAvailable}" ToolTip="{Binding Pan}" Margin="64,88,10,10" VerticalAlignment="Top" Minimum="-1" Maximum="1" SmallChange=".01" LargeChange=".1" TickFrequency=".2" TickPlacement="BottomRight" MouseDoubleClick="OnResetPanSlider" />
+            </Grid>
+            <DataTemplate.Triggers>
                             <DataTrigger Binding="{Binding UserIsSpeaking}" Value="True">
                                 <Setter TargetName="UserBorder" Property="BorderBrush" Value="#1ef191" />
                             </DataTrigger>
