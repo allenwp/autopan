@@ -457,6 +457,8 @@ namespace AutoPan
                     for(; index < connectedUserSettings.Count && connectedUserSettings[index].Id < settingsToAdd.Id; index++)
                     { }
                     connectedUserSettings.Insert(index, settingsToAdd);
+
+                    AutoPan();
                 }));
             }
         }
@@ -603,7 +605,34 @@ namespace AutoPan
 
         private void AutoPan()
         {
+            int numberOfAutoPans = 0;
+            foreach(var userSetting in connectedUserSettings)
+            {
+                if(userSetting.AutoPan)
+                {
+                    numberOfAutoPans++;
+                }
+            }
 
+            if (numberOfAutoPans > 0)
+            {
+                int autoPanCounter = 0;
+                foreach (var userSetting in connectedUserSettings)
+                {
+                    if (userSetting.AutoPan)
+                    {
+                        float pan = 0;
+                        if (numberOfAutoPans > 1)
+                        {
+                            pan = (float)autoPanCounter / (float)(numberOfAutoPans - 1); // figure out pan between 0 and 1
+                            pan = (pan * 2f) - 1f; // scale to -1 to 1 range
+                        }
+                        userSetting.Pan = pan;
+
+                        autoPanCounter++;
+                    }
+                }
+            }
         }
     }
 }
