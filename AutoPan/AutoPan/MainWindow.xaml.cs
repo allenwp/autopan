@@ -435,6 +435,7 @@ namespace AutoPan
             {
                 Dispatcher.Invoke((Action)(() =>
                 {
+                    UserSettings settingsToAdd;
                     if (savedUserSettings.ContainsKey(user.Id))
                     {
                         UserSettings settings = savedUserSettings[user.Id];
@@ -442,14 +443,20 @@ namespace AutoPan
                         // Update the saved name, since that might have changed while they were offline:
                         settings.Name = user.Name;
 
-                        connectedUserSettings.Add(savedUserSettings[user.Id]);
+                        settingsToAdd = savedUserSettings[user.Id];
                     }
                     else
                     {
                         UserSettings newSettings = new UserSettings(user.Id) { Name = user.Name };
                         savedUserSettings[user.Id] = newSettings;
-                        connectedUserSettings.Add(newSettings);
+                        settingsToAdd = newSettings;
                     }
+
+                    // Keep the connectedUserSettings sorted by ID so that users are always auto panned to the same position relative to other users.
+                    int index = 0;
+                    for(; index < connectedUserSettings.Count && connectedUserSettings[index].Id < settingsToAdd.Id; index++)
+                    { }
+                    connectedUserSettings.Insert(index, settingsToAdd);
                 }));
             }
         }
@@ -592,6 +599,11 @@ namespace AutoPan
             {
                 slider.Value = 0f;
             }
+        }
+
+        private void AutoPan()
+        {
+
         }
     }
 }
