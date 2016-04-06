@@ -385,7 +385,7 @@ namespace AutoPan
                             break;
                         }
                     }
-                    connectedUserSettings.Remove(settingsToRemove);
+                    RemoveUser(settingsToRemove);
                 }));
             }
             else if (e.Before.VoiceChannel != channel && e.After.VoiceChannel == channel)
@@ -465,6 +465,12 @@ namespace AutoPan
                     AutoPan();
                 }));
             }
+        }
+
+        private void RemoveUser(UserSettings user)
+        {
+            connectedUserSettings.Remove(user);
+            AutoPan();
         }
 
         private void OnLogMessage(object sender, LogMessageEventArgs e)
