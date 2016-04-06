@@ -259,6 +259,7 @@ namespace AutoPan
             .AddService<HttpService>();
 
             client.UserUpdated += Client_UserUpdated;
+            client.MessageReceived += Client_MessageReceived;
 
             // The only way I know how to get the audioService right now to subscribe to the userIsSpeakingUpdated thingy
             AudioService audioService = null;
@@ -392,6 +393,15 @@ namespace AutoPan
             {
                 // User joined this voice channel or has changed voice channel to join this channel
                 AddUser(e.After);
+            }
+        }
+
+        private void Client_MessageReceived(object sender, MessageEventArgs e)
+        {
+            if(e.Message.IsMentioningMe())
+            {
+                // We were mentioned! Let them know about Auto Pan:
+                e.Message.Channel.SendMessage("Hi there, I'm an Auto Pan bot! Auto Pan is a tool that performs an automatic stereo spread of user's voices in a Discord voice channel. Find out more at http://allenwp.github.io/autopan");
             }
         }
 
