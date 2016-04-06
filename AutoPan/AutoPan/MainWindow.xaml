@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AutoPan"
         mc:Ignorable="d"
-        Title="Auto Pan for Discord" Width="662.138" Height="516.876">
+        Title="Auto Pan for Discord" Width="662.138" Height="554.196">
     <Grid>
         <Image x:Name="image" Source="Graphics/auto-pan-logo.png" Width="250" Height="105" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,0,0,0"/>
 

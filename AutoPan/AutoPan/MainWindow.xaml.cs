@@ -126,7 +126,7 @@ namespace AutoPan
 
             Closing += MainWindow_Closing;
 
-            OnLogMessage(this, new LogMessageEventArgs(LogSeverity.Info, "Auto Pan", "Thanks for using Auto Pan! Here's how to set it up: \n\n- Auto Pan requires you to create a second Discord user account. I recommend adding \"[Auto Pan]\" it's username.\n\n-Your second account needs access to the server and voice channel you are using with your primary account.\n\n-Use this second account to log in above.\n\n- Auto Pan will output panned audio from the voice channel it's connected to.\n\n- Mute yourself in Auto Pan so you don't hear yourself speaking.\n\n- Use Discord normally with your primary account for transmitting your voice.\n\n- Mute each individual user in Discord to prevent duplicate audio/echo.\n\nThis is version 1 – Keep an eye out for new updates at: allenwp.github.io/autopan", null));
+            OnLogMessage(this, new LogMessageEventArgs(LogSeverity.Info, null, "Thanks for using Auto Pan!\n\nSetup Instructions:\n\n- Auto Pan requires you to create a second Discord user account. I recommend adding \"[Auto Pan]\" it's username.\n\n-Your second account needs access to the server and voice channel you are using with your primary account.\n\n-Use this second account to log in above.\n\n- Auto Pan will output panned audio from the voice channel it's connected to.\n\n- Mute yourself in Auto Pan so you don't hear yourself speaking.\n\n- Use Discord normally with your primary account for transmitting your voice.\n\n- Mute each individual user in Discord to prevent duplicate audio/echo.\n\n---\n\nVersion 0.1\n\nKeep an eye out for new updates at: allenwp.github.io/autopan\n\n---", null));
             logScrollViewer.ScrollToTop();
 
             LoadConnectionSettings();
@@ -538,7 +538,7 @@ namespace AutoPan
                 {
                     builder.Append("\n\n");
                 }
-                if (sourceName != null)
+                if (!string.IsNullOrWhiteSpace(sourceName))
                 {
                     builder.Append('[');
                     builder.Append(sourceName);
