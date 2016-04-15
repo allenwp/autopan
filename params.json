@@ -1,1 +1,7 @@
-{"name":"Auto Pan for Discord","tagline":"An auto-pan for Discord. Performs an automatic stereo spread of user's voices in a Discord voice channel.","body":"![Auto Pan for Discord](https://cloud.githubusercontent.com/assets/17506573/13370008/1a950eda-dccb-11e5-89fc-c5b68544f401.png)\r\n\r\n# Status\r\nFeb. 26, 2016 - Started work!","google":"","note":"Don't delete this file! It's used internally to help with page regeneration."}
+{
+  "name": "Auto Pan for Discord",
+  "tagline": "An auto-pan for Discord. Performs an automatic stereo spread of user's voices in a Discord voice channel.",
+  "body": "![Auto Pan for Discord](https://cloud.githubusercontent.com/assets/17506573/13370008/1a950eda-dccb-11e5-89fc-c5b68544f401.png)\r\n\r\n# Status\r\nApr. 15, 2016 - Pre-alpha release: Has all functionality except for audio output. I'm waiting on Discord.Net for complete audio support before adding this (obviously crucial) feature.\r\n\r\nFeb. 26, 2016 - Started work!",
+  "google": "",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
