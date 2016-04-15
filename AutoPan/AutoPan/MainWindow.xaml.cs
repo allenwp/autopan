@@ -7,16 +7,9 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Xml.Serialization;
 
 namespace AutoPan
@@ -26,8 +19,16 @@ namespace AutoPan
     /// </summary>
     public partial class MainWindow : Window
     {
-        readonly string CONNECTION_SETTINGS_PATH = ".\\ConnectionSettings.xml";
-        readonly string USER_SETTINGS_PATH = ".\\UserSettings.xml";
+        readonly string CONNECTION_SETTINGS_FILE = "ConnectionSettings.xml";
+        readonly string USER_SETTINGS_FILE = "UserSettings.xml";
+        public string SavePath {
+            get
+            {
+                string result = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Auto Pan");
+                Directory.CreateDirectory(result);
+                return result;
+            }
+        }
 
         enum UIState { LoggedOut, Connecting, LoggedIn, ConnectedToChannel }
 
@@ -137,7 +138,7 @@ namespace AutoPan
         {
             try
             {
-                using (StreamReader reader = new StreamReader(CONNECTION_SETTINGS_PATH, Encoding.UTF8))
+                using (StreamReader reader = new StreamReader(Path.Combine(SavePath, CONNECTION_SETTINGS_FILE), Encoding.UTF8))
                 {
                     XmlSerializer serializer = new XmlSerializer(lastSuccessfulConnectionSettings.GetType());
                     lastSuccessfulConnectionSettings = (ConnectionSettings)serializer.Deserialize(reader);
@@ -164,7 +165,7 @@ namespace AutoPan
         {
             try
             {
-                using (StreamReader reader = new StreamReader(USER_SETTINGS_PATH, Encoding.UTF8))
+                using (StreamReader reader = new StreamReader(Path.Combine(SavePath, USER_SETTINGS_FILE), Encoding.UTF8))
                 {
                     savedUserSettings = new Dictionary<ulong, UserSettings>();
                     XmlSerializer serializer = new XmlSerializer(typeof(UserSettings[]));
@@ -202,7 +203,7 @@ namespace AutoPan
             bool result = false;
             try
             {
-                using (StreamWriter writer = new StreamWriter(USER_SETTINGS_PATH, false, Encoding.UTF8))
+                using (StreamWriter writer = new StreamWriter(Path.Combine(SavePath, USER_SETTINGS_FILE), false, Encoding.UTF8))
                 {
                     UserSettings[] values = savedUserSettings.Values.ToArray();
                     XmlSerializer serializer = new XmlSerializer(values.GetType());
@@ -223,7 +224,7 @@ namespace AutoPan
             bool result = false;
             try
             {
-                using (StreamWriter writer = new StreamWriter(CONNECTION_SETTINGS_PATH, false, Encoding.UTF8))
+                using (StreamWriter writer = new StreamWriter(Path.Combine(SavePath, CONNECTION_SETTINGS_FILE), false, Encoding.UTF8))
                 {
                     XmlSerializer serializer = new XmlSerializer(lastSuccessfulConnectionSettings.GetType());
                     serializer.Serialize(writer, lastSuccessfulConnectionSettings);
@@ -401,7 +402,7 @@ namespace AutoPan
             if(e.Message.IsMentioningMe())
             {
                 // We were mentioned! Let them know about Auto Pan:
-                e.Message.Channel.SendMessage("Hi there, I'm an Auto Pan bot! Auto Pan is a tool that performs an automatic stereo spread of user's voices in a Discord voice channel. Find out more at http://allenwp.github.io/autopan");
+                e.Message.Channel.SendMessage("Hi there! I'm an Auto Pan bot. Auto Pan is a tool that performs a stereo spread to make it easier to distinguish voices. Find out more at http://allenwp.github.io/autopan");
             }
         }
 
@@ -442,6 +443,8 @@ namespace AutoPan
 
         private void AddUser(User user)
         {
+            // FIXME: Sometimes currentUser can be null here... figure out where this comes from (it's either from connect or user updated)
+            // can be repliacted by stopping debugingg (which doesn't correctly log out), then re-opening and waiting for things to happen.
             if (user.Id != client.CurrentUser.Id)
             {
                 Dispatcher.Invoke((Action)(() =>
