@@ -1,6 +1,6 @@
 {
   "name": "Auto Pan for Discord",
-  "tagline": "An auto-pan for Discord. Performs an automatic stereo spread of user's voices in a Discord voice channel.",
+  "tagline": "An auto-pan for Discord on Windows. Performs an automatic stereo spread of user's voices in a Discord voice channel.",
   "body": "![Auto Pan for Discord](https://cloud.githubusercontent.com/assets/17506573/13370008/1a950eda-dccb-11e5-89fc-c5b68544f401.png)\r\n\r\n# Downloads\r\n## [Version 0.1 Pre-Alpha (No audio output yet!)](https://github.com/allenwp/autopan/releases/download/v0.1/AutoPan0.1_No-audio-output.zip)\r\nThis release is a preview of the GUI functionality. It can connect and disconnect from a discord voice channel and has all logic in place to allow control of user's volumes and pan, including the auto pan feature. Except for audio output, this version is very close to what 1.0 will look like and how it will behave.\r\n\r\n# Status\r\nApr. 15, 2016 - Pre-alpha release: Has all functionality except for audio output. I'm waiting on Discord.Net for complete audio support before adding this (obviously crucial) feature.\r\n\r\nFeb. 26, 2016 - Started work!",
   "google": "",
   "note": "Don't delete this file! It's used internally to help with page regeneration."
