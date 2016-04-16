@@ -261,18 +261,7 @@ namespace AutoPan
 
             client.UserUpdated += Client_UserUpdated;
             client.MessageReceived += Client_MessageReceived;
-
-            // The only way I know how to get the audioService right now to subscribe to the userIsSpeakingUpdated thingy
-            AudioService audioService = null;
-            foreach (var service in client.Services)
-            {
-                audioService = service as AudioService;
-                if(audioService != null)
-                {
-                    audioService.UserIsSpeakingUpdated += AudioService_UserIsSpeakingUpdated;
-                    break;
-                }
-            }
+            // TODO: Hook up AudioService_UserIsSpeakingUpdated
 
             try
             {
